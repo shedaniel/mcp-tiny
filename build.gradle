@@ -1,0 +1,64 @@
+plugins {
+    id("org.jetbrains.kotlin.jvm") version("1.4.0")
+    id("org.jetbrains.kotlin.plugin.serialization") version("1.4.0")
+    id("java")
+    id("com.github.johnrengelman.shadow") version("5.2.0")
+    id("net.minecrell.licenser") version("0.4.1")
+}
+
+group "me.shedaniel"
+sourceCompatibility = targetCompatibility = 1.8
+
+license {
+    include "**/*.kt"
+    header = project.file("HEADER.txt")
+    ext {
+        name = "shedaniel"
+        year = "2019, 2020"
+    }
+}
+
+configurations {
+    shadow {
+        extendsFrom(runtime)
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url "https://maven.fabricmc.net" }
+    maven { url "https://jitpack.io" }
+    maven { url "https://dl.bintray.com/kotlin/kotlinx/" }
+    maven { url "https://dl.bintray.com/kotlin/kotlin-dev/" }
+    maven { url "https://dl.bintray.com/shedaniel/linkie" }
+}
+
+dependencies {
+    compile("me.shedaniel:linkie-core:1.0.47")
+}
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": "me.shedaniel.mcptiny.MCPTiny"
+        )
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    classifier null
+}
+
+compileKotlin {
+    kotlinOptions.suppressWarnings = true
+    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        freeCompilerArgs = ["-Xopt-in=kotlin.RequiresOptIn", "-Xinline-classes"]
+    }
+}
+
+task stage(dependsOn: ['build', 'clean'])
+build.mustRunAfter clean
+build.dependsOn shadowJar
